@@ -14,7 +14,7 @@ namespace QuanLyNhanSuADO.ADOManagement
 {
     internal class ADODepartment
     {
-        ADOManager manager;
+        
         public ADODepartment()
         {
             
@@ -82,10 +82,22 @@ namespace QuanLyNhanSuADO.ADOManagement
 
         public bool Remove(string maPB)
         {
-            string query = "UPDATE PhongBan SET DAXOA = 1 WHERE MaPB = @maPB";
-            SqlParameter[] parameters = new SqlParameter[1];
-            parameters[0] = new SqlParameter("@maPB", maPB);
-            return manager.ExecuteNonQuery(query, parameters);
+            //string query = "UPDATE PhongBan SET DAXOA = 1 WHERE MaPB = @maPB";
+            //SqlParameter[] parameters = new SqlParameter[1];
+            //parameters[0] = new SqlParameter("@maPB", maPB);
+            //return manager.ExecuteNonQuery(query, parameters);
+            using (QuanLyNhanSuDataContext qlNS = new QuanLyNhanSuDataContext())
+            {
+                PHONGBAN pbQuery = qlNS.PHONGBANs.Where(p => p.MAPB.Equals(maPB)).SingleOrDefault();
+
+                if (pbQuery != null)
+                {
+                    pbQuery.DAXOA = true;
+                    qlNS.NHANVIENs.Context.SubmitChanges();
+                }
+                return true;
+            }
+
         }
         public bool Add(PhongBan phongBan)
         {
@@ -104,22 +116,51 @@ namespace QuanLyNhanSuADO.ADOManagement
 
         public bool OnRemoveNhanVien(string maNV)
         {
-            string query = "UPDATE PhongBan SET MaTruongPB = null WHERE MaTruongPB = @maNV";
-            SqlParameter[] parameters = new SqlParameter[1];
-            parameters[0] = new SqlParameter("@maNV", maNV);
-            return manager.ExecuteNonQuery(query, parameters);
+            //string query = "UPDATE PhongBan SET MaTruongPB = null WHERE MaTruongPB = @maNV";
+            //SqlParameter[] parameters = new SqlParameter[1];
+            //parameters[0] = new SqlParameter("@maNV", maNV);
+            //return manager.ExecuteNonQuery(query, parameters);
+            using (QuanLyNhanSuDataContext qlNS = new QuanLyNhanSuDataContext())
+            {
+                PHONGBAN pbQuery = qlNS.PHONGBANs.Where(p => p.MATRUONGPB.Equals(maNV)).SingleOrDefault();
+
+                if (pbQuery != null)
+                {
+                    pbQuery.MAPB = null;
+                    qlNS.NHANVIENs.Context.SubmitChanges();
+                }
+                return true;
+            }
         }
 
         public DataTable GetCountNhanVien()
         {
-            string query = "SELECT MaPB, COUNT(MaNV) AS SoNhanVien FROM NhanVien WHERE DAXOA = 0 GROUP BY MaPB";
-            return manager.ExecuteQuery(query);
-        }
+            //string query = "SELECT MaPB, COUNT(MaNV) AS SoNhanVien FROM NhanVien WHERE DAXOA = 0 GROUP BY MaPB";
+            //return manager.ExecuteQuery(query);
+            using (QuanLyNhanSuDataContext qlNS = new QuanLyNhanSuDataContext())
+            {
+                var queryGetCountNV =   from p in qlNS.NHANVIENs
+                                        where p.DAXOA == false
+                                        group p by p.MAPB into g
+                                        select new { maPB = g.Key, SoNhanVien = g.Count()};
 
+
+                DataTable nhanVien = Utilities.LINQResultToDataTable(queryGetCountNV);
+                return nhanVien;
+            }
+        }
+        
         public DataTable GetSumSalary()
         {
-            string query = "SELECT MaPB, SUM(Luong) AS TongLuong FROM NhanVien WHERE DAXOA = 0 GROUP BY MaPB";
-            return manager.ExecuteQuery(query);
+            //string query = "SELECT MaPB, SUM(Luong) AS TongLuong FROM NhanVien WHERE DAXOA = 0 GROUP BY MaPB";
+            //return manager.ExecuteQuery(query);
+            using (QuanLyNhanSuDataContext qlNS = new QuanLyNhanSuDataContext())
+            {
+                var queryGetSumSalary = qlNS.NHANVIENs.Where(p=>p.DAXOA == false).GroupBy(p => p.MAPB).Select(g => new { MaPB = g.Key, Total = g.Sum(p => p.LUONG) });
+                DataTable nhanVien = Utilities.LINQResultToDataTable(queryGetSumSalary);
+                return nhanVien;
+            }
+
         }
     }
 }

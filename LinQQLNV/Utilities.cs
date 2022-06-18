@@ -9,6 +9,7 @@ using QuanLyNhanSuADO.Objects;
 using QuanLyNhanSuADO.ADOManagement;
 using ClosedXML.Excel;
 using System.Windows.Forms;
+using System.Reflection;
 
 namespace QuanLyNhanSuADO
 {
@@ -68,7 +69,7 @@ namespace QuanLyNhanSuADO
             List<ThanNhan> list = new List<ThanNhan>();
             foreach (DataRow row in table.Rows)
             {
-                ThanNhan item = new ThanNhan(row["MaNV"].ToString(), row["HoTen"].ToString(), row["QuanHe"].ToString(), row["SDT"].ToString());
+                ThanNhan item = new ThanNhan(row["MaNV"].ToString(), row["HoTen"].ToString(), row["QUANHE"].ToString(), row["SDT"].ToString());
                 list.Add(item);
             }
             return list;
@@ -95,13 +96,13 @@ namespace QuanLyNhanSuADO
 
             for (int i = 0; i < table.Rows.Count; i++)
             {
-                for (int j = 0; j < table.Columns.Count; j++)
+                for (int j = 0; j < columnsName.Count(); j++)
                 {
                     ws.Cell(i + 3, j + 1).Value = table.Rows[i][j];
                 }
             }
 
-            wb.SaveAs("D:\\File.xlsx");
+            wb.SaveAs("E:\\File.xlsx");
             MessageBox.Show("Đã lưu!");
         }
 
@@ -126,6 +127,46 @@ namespace QuanLyNhanSuADO
                 dt.Rows.Add(values);
             }
 
+            return dt;
+        }
+
+        public static DataTable LINQResultToDataTable<T>(IEnumerable<T> Linqlist)
+        {
+            DataTable dt = new DataTable();
+            PropertyInfo[] columns = null;
+
+            if (Linqlist == null) return dt;
+
+            foreach (T Record in Linqlist)
+            {
+
+                if (columns == null)
+                {
+                    columns = ((Type)Record.GetType()).GetProperties();
+                    foreach (PropertyInfo GetProperty in columns)
+                    {
+                        Type colType = GetProperty.PropertyType;
+
+                        if ((colType.IsGenericType) && (colType.GetGenericTypeDefinition()
+                               == typeof(Nullable<>)))
+                        {
+                            colType = colType.GetGenericArguments()[0];
+                        }
+
+                        dt.Columns.Add(new DataColumn(GetProperty.Name, colType));
+                    }
+                }
+
+                DataRow dr = dt.NewRow();
+
+                foreach (PropertyInfo pinfo in columns)
+                {
+                    dr[pinfo.Name] = pinfo.GetValue(Record, null) == null ? DBNull.Value : pinfo.GetValue
+                           (Record, null);
+                }
+
+                dt.Rows.Add(dr);
+            }
             return dt;
         }
     }

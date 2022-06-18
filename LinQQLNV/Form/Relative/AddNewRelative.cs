@@ -50,8 +50,16 @@ namespace QuanLyNhanSuADO.Forms
             ThanNhan thanNhan = new ThanNhan(nv, hoTen, quanHe, sdt);
             try
             {
-                management.AddThanNhan(thanNhan);
-                MessageBox.Show("Thêm thành công");
+                if (management.AddThanNhan(thanNhan))
+                {
+                    MessageBox.Show("Thêm thành công");
+                    this.Close();
+
+                }
+                else
+                {
+                    MessageBox.Show("Thêm thất bại!")
+                }
             }
             catch (Exception ex)
             {

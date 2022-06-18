@@ -23,17 +23,17 @@ namespace QuanLyNhanSuADO.Forms
         private void thongKeLuong_Click(object sender, EventArgs e)
         {
 
-            try
-            {
+            //try
+            //{
                 int min = Convert.ToInt32(Utilities.NormalizedString(min_textBox.Text));
                 int max = Convert.ToInt32(Utilities.NormalizedString(max_textBox.Text));
                 DataTable data = management.GetAllLuongNhanVien(min, max);
                 Utilities.ExportExcelFile(data, Utilities.NhanVienHeader, $"Thống kê lương nhân viên", $"Thống kê nhân viên có lương từ {min} đến {max}");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Message);
+            //}
         }
 
         private void retire_Click(object sender, EventArgs e)

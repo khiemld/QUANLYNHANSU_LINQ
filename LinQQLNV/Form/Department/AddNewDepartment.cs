@@ -33,7 +33,7 @@ namespace QuanLyNhanSuADO.Forms
         {
            DataTable phongBan = management.GetAllNhanVien();
             Dictionary<string, string> phongBanDictionary = new Dictionary<string, string>();
-            
+            phongBanDictionary.Add("", "Không có");
            foreach(DataRow phong in phongBan.Rows)
             {
                 phongBanDictionary.Add(phong["MaNV"].ToString(), phong["HoTen"].ToString());

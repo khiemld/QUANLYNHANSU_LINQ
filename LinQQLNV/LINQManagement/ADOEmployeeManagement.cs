@@ -20,7 +20,7 @@ namespace QuanLyNhanSuADO.ADOManagement
         {
 
             employee = new ADOEmployee();
-            //relative = new ADORelative(manager);
+            relative = new ADORelative();
             department = new ADODepartment();
 
         }

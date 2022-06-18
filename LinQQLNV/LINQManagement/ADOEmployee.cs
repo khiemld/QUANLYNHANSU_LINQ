@@ -12,7 +12,6 @@ namespace QuanLyNhanSuADO.ADOManagement
 {
     public class ADOEmployee
     {
-        ADOManager manager;
         public ADOEmployee()
         {
        
@@ -52,13 +51,11 @@ namespace QuanLyNhanSuADO.ADOManagement
         {
             using (QuanLyNhanSuDataContext qlNS = new QuanLyNhanSuDataContext())
             {
-                IEnumerable<NHANVIEN> queryNV = from nv in qlNS.NHANVIENs select nv;
+                IEnumerable<NHANVIEN> queryNV = from nv in qlNS.NHANVIENs where nv.DAXOA == false select nv;
                 DataTable nhanVien = Utilities.ConvertToDataTable<NHANVIEN>(queryNV);
                 return nhanVien;
             }
         }
-
-       
 
         public NhanVien Get(string maNV)
         {
@@ -100,17 +97,24 @@ namespace QuanLyNhanSuADO.ADOManagement
 
         public bool Remove(string maNV)
         {
-            string query = "UPDATE NHANVIEN SET DAXOA = 1 WHERE MaNV = @maNV";
-            SqlParameter[] parameters = new SqlParameter[1];
-            parameters[0] = new SqlParameter("@maNV", maNV);
-            return manager.ExecuteNonQuery(query, parameters);
+            //string query = "UPDATE NHANVIEN SET DAXOA = 1 WHERE MaNV = @maNV";
+            //SqlParameter[] parameters = new SqlParameter[1];
+            //parameters[0] = new SqlParameter("@maNV", maNV);
+            //return manager.ExecuteNonQuery(query, parameters);
+            using (QuanLyNhanSuDataContext qlNS = new QuanLyNhanSuDataContext())
+            {
+                NHANVIEN nvQuery = qlNS.NHANVIENs.Where(p => p.MANV.Equals(maNV)).SingleOrDefault();
+                if(nvQuery != null)
+                {
+                    nvQuery.DAXOA = true;
+                    qlNS.NHANVIENs.Context.SubmitChanges();
+                }
+                return true;
+            }
         }
 
         public DataTable Search(string id, string name, string department, string sex)
         {
-            //string query = $"Select * from NhanVien where MaNV LIKE '%{id}%' and HoTen like '%{name}%' and MaPB like '%{department}%' and GioiTinh like '%{sex}%' AND DAXOA = 0";
-
-            //return manager.ExecuteQuery(query);
             using (QuanLyNhanSuDataContext qlNS = new QuanLyNhanSuDataContext())
             {
 
@@ -125,28 +129,60 @@ namespace QuanLyNhanSuADO.ADOManagement
 
         public bool OnRemovePhongBan(string maPB)
         {
-            string query = "Update NhanVien set MaPB = 'NONE' where MaPB = @MaPB";
-            SqlParameter[] parameters = new SqlParameter[1];
-            parameters[0] = new SqlParameter("@MaPB", maPB);
-            return manager.ExecuteNonQuery(query, parameters);
+            //string query = "Update NhanVien set MaPB = 'NONE' where MaPB = @MaPB";
+            //SqlParameter[] parameters = new SqlParameter[1];
+            //parameters[0] = new SqlParameter("@MaPB", maPB);
+            //return manager.ExecuteNonQuery(query, parameters);
+            using (QuanLyNhanSuDataContext qlNS = new QuanLyNhanSuDataContext())
+            {
+                NHANVIEN nvQuery = qlNS.NHANVIENs.Where(p => p.MAPB.Equals(maPB)).SingleOrDefault();
+                if (nvQuery != null)
+                {
+                    nvQuery.MAPB = "";
+                    qlNS.NHANVIENs.Context.SubmitChanges();
+                }
+                return true;
+            }
+
         }
 
         public DataTable GetAllLuongNhanVien(int min, int max)
         {
-            string query = $"SELECT * FROM NhanVien WHERE Luong >= {min} AND Luong <= {max} AND DAXOA = 0";
-            return manager.ExecuteQuery(query);
+            //string query = $"SELECT * FROM NhanVien WHERE Luong >= {min} AND Luong <= {max} AND DAXOA = 0";
+            //return manager.ExecuteQuery(query);
+            using (QuanLyNhanSuDataContext qlNS = new QuanLyNhanSuDataContext())
+            {
+
+                IEnumerable<NHANVIEN> queryNV = from nv in qlNS.NHANVIENs where (nv.LUONG > min) && (nv.LUONG < max) && (nv.DAXOA == false) select nv;
+                DataTable nhanVien = Utilities.ConvertToDataTable(queryNV);
+
+                return nhanVien;
+            }
         }
 
         public DataTable GetAllNhanVienHaveBirthday()
         {
-            string query = $"SELECT * FROM NhanVien WHERE MONTH(NgaySinh) = MONTH(GETDATE()) AND DAXOA = 0";
-            return manager.ExecuteQuery(query);
+            //string query = $"SELECT * FROM NhanVien WHERE MONTH(NgaySinh) = MONTH(GETDATE()) AND DAXOA = 0";
+            //return manager.ExecuteQuery(query);
+            string month = DateTime.Now.Month.ToString();
+            using (QuanLyNhanSuDataContext qlNS = new QuanLyNhanSuDataContext())
+            {
+                IEnumerable<NHANVIEN> nvQuery = from nv in qlNS.NHANVIENs where nv.NGAYSINH.Month.ToString().Equals(month) && nv.DAXOA == false select nv;
+                return Utilities.ConvertToDataTable<NHANVIEN>(nvQuery);
+            }
+
         }
 
         public DataTable GetAllNhanVienRetire()
         {
-            string query = $"SELECT * FROM NhanVien WHERE TrangThai = 'Đã nghỉ' AND DAXOA = 0";
-            return manager.ExecuteQuery(query);
+            //string query = $"SELECT * FROM NhanVien WHERE TrangThai = 'Đã nghỉ' AND DAXOA = 0";
+            //return manager.ExecuteQuery(query);
+            using (QuanLyNhanSuDataContext qlNS = new QuanLyNhanSuDataContext())
+            {
+                IEnumerable<NHANVIEN> nvQuery = from nv in qlNS.NHANVIENs where nv.TRANGTHAI == "Đã nghỉ" && nv.DAXOA == false select nv;
+                return Utilities.ConvertToDataTable<NHANVIEN>(nvQuery);
+
+            }
         }
     }
 }

@@ -59,6 +59,7 @@ namespace QuanLyNhanSuADO.Forms
                 if (management.UpdateThanNhan(thanNhan))
                 {
                     MessageBox.Show("Đã cập nhật thành công!");
+                    this.Close();
                 }
                 else
                 {
